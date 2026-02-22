@@ -1,0 +1,27 @@
+ktor:
+  application:
+    modules:
+      - net.alexsobolev.tts.app.ApplicationKt.module
+  deployment:
+    port: 8080
+
+tts:
+  tokenizer:
+    configPath: "data/config.json"
+  voices:
+    path: "data/voices-v1.0.bin"
+  phonemizer:
+    goldDictPath: "data/us_gold.json"
+    silverDictPath: "data/us_silver.json"
+    gbGoldDictPath: "data/gb_gold.json"
+    gbSilverDictPath: "data/gb_silver.json"
+    fixesDictPath: "data/lexicon_fixes.json"
+  pos:
+    modelPath: "data/en-pos-perceptron.bin"
+  model:
+    onnxPath: "data/kokoro-v1.0.int8.onnx"
+  aws:
+    region: "$AWS_REGION:eu-central-1"
+    s3Bucket: "$S3_BUCKET:tts-audio-default"
+  storage:
+    prefix: "$STORAGE_PREFIX:tts-audio"

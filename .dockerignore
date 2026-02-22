@@ -1,0 +1,33 @@
+# Version control
+.git
+.gitignore
+
+# Build outputs
+.gradle
+.kotlin
+build/
+*/build/
+out/
+
+# IDE
+.idea
+.vscode
+*.iws
+*.iml
+*.ipr
+
+# Documentation and scripts (not needed in image)
+docs/
+scripts/
+*.md
+
+# Data files (downloaded inside the Docker build)
+data/
+
+# OS files
+.DS_Store
+
+# Secrets (should never be in image)
+*.pem
+.env
+.env.*
