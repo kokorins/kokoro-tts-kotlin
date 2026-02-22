@@ -12,15 +12,63 @@ A pure-JVM text-to-speech server powered by the [Kokoro-82M](https://huggingface
 
 Supports single-voice synthesis, multi-voice dialogue with natural turn gaps, voice blending, inline phoneme annotations for foreign words, and WAV/MP3 output at 24 kHz.
 
-## Quick Start
+## Installation
 
-**Prerequisites:** JDK 25+
+### Prerequisites
+
+- **JDK 25+** — download from [Oracle](https://www.oracle.com/java/technologies/downloads/) or install via [SDKMAN!](https://sdkman.io/):
+  ```bash
+  sdk install java 25-open
+  ```
+- **curl** — required by the data download script (pre-installed on macOS/Linux)
+- **AWS credentials** — configured via environment variables or `~/.aws/credentials` (for S3 audio storage)
+
+### Clone and Setup
 
 ```bash
-# Download model, lexicon, and POS tagger files (~400 MB)
-./scripts/download-data.sh
+git clone https://github.com/alexsobolev/kokoro-tts-kotlin.git
+cd kokoro-tts-kotlin
+```
 
-# Build and run
+### Download Model Files
+
+The TTS pipeline requires model weights, voice embeddings, and pronunciation dictionaries (~400 MB total). The script skips files that already exist.
+
+```bash
+./scripts/download-data.sh
+```
+
+This downloads into the `data/` directory:
+
+| File | Size | Description |
+|------|------|-------------|
+| `kokoro-v1.0.int8.onnx` | ~370 MB | Quantized ONNX TTS model |
+| `voices-v1.0.bin` | ~25 MB | Voice style embeddings |
+| `config.json` | <1 KB | Tokenizer vocabulary |
+| `us_gold.json`, `us_silver.json` | ~2 MB | US English pronunciation dictionaries |
+| `gb_gold.json`, `gb_silver.json` | ~2 MB | GB English pronunciation dictionaries |
+| `en-pos-perceptron.bin` | ~4 MB | OpenNLP POS tagger model |
+
+### Configure Environment
+
+Set the required S3 bucket for audio storage:
+
+```bash
+export AWS_REGION=eu-central-1
+export S3_BUCKET=my-tts-bucket
+```
+
+See [Configuration](#configuration) for all available settings.
+
+### Build and Verify
+
+```bash
+./gradlew build    # Compile, lint, static analysis, and tests
+```
+
+## Quick Start
+
+```bash
 ./gradlew :app:run
 ```
 
