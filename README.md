@@ -12,6 +12,8 @@ A pure-JVM text-to-speech server powered by the [Kokoro-82M](https://huggingface
 
 Supports single-voice synthesis, multi-voice dialogue with natural turn gaps, voice blending, inline phoneme annotations for foreign words, and WAV/MP3 output at 24 kHz.
 
+The entire process of building this project — from model research and G2P engineering to clean architecture, deployment, and performance tuning — is described in detail in [How to Build Self-Hosted TTS That Actually Sounds Good](https://open.substack.com/pub/sobolev/p/how-to-build-self-hosted-tts-that?utm_campaign=post-expanded-share&utm_medium=web).
+
 ## Installation
 
 ### Prerequisites
