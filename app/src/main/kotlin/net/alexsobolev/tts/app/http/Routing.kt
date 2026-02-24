@@ -2,6 +2,7 @@ package net.alexsobolev.tts.app.http
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
+import io.ktor.server.http.content.staticFiles
 import io.ktor.server.plugins.openapi.openAPI
 import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.request.receive
@@ -23,6 +24,7 @@ import net.alexsobolev.tts.core.dto.SynthesisResponse
 import net.alexsobolev.tts.core.dto.Voice
 import net.alexsobolev.tts.core.dto.VoicesResponse
 import net.alexsobolev.tts.core.usecase.SynthesizeSpeechUseCase
+import net.alexsobolev.tts.infra.InfraConfig
 import net.alexsobolev.tts.infra.mcp.McpServerFactory
 import org.koin.ktor.ext.get
 import java.util.concurrent.ConcurrentHashMap
@@ -31,10 +33,15 @@ import java.util.concurrent.ConcurrentHashMap
 fun Application.configureRouting() {
     val voiceRepo: VoiceRepository = get()
     val useCase: SynthesizeSpeechUseCase = get()
+    val infraConfig: InfraConfig = get()
 
     routing {
         swaggerUI(path = "swagger")
         openAPI(path = "openapi")
+
+        if (infraConfig.storageMode != "s3") {
+            staticFiles("/audio", java.io.File(infraConfig.localOutputDir))
+        }
 
         get("/health") {
             call.respondText("OK")

@@ -17,10 +17,13 @@ import net.alexsobolev.tts.infra.g2p.PosTagger
 import net.alexsobolev.tts.infra.inference.KokoroTokenizer
 import net.alexsobolev.tts.infra.inference.NpzVoiceRepository
 import net.alexsobolev.tts.infra.inference.OnnxKokoroEngine
+import net.alexsobolev.tts.infra.storage.LocalFileAudioStorage
 import net.alexsobolev.tts.infra.storage.S3AudioStorage
 import org.koin.dsl.module
 
 fun infraModule(config: InfraConfig) = module {
+    single { config }
+
     single { KokoroTokenizer(config.tokenizerConfigPath) }
 
     single<VoiceRepository> {
@@ -64,21 +67,30 @@ fun infraModule(config: InfraConfig) = module {
 
     single<AudioEncoder> { LocalAudioEncoder() }
 
-    single {
-        S3Client {
-            region = config.awsRegion
-            retryStrategy {
-                maxAttempts = 3
+    if (config.storageMode == "s3") {
+        single {
+            S3Client {
+                region = config.awsRegion
+                retryStrategy {
+                    maxAttempts = 3
+                }
             }
         }
-    }
 
-    single<AudioStorage> {
-        S3AudioStorage(
-            s3 = get(),
-            bucketName = config.s3Bucket,
-            region = config.awsRegion,
-            storagePrefix = config.storagePrefix,
-        )
+        single<AudioStorage> {
+            S3AudioStorage(
+                s3 = get(),
+                bucketName = config.s3Bucket,
+                region = config.awsRegion,
+                storagePrefix = config.storagePrefix,
+            )
+        }
+    } else {
+        single<AudioStorage> {
+            LocalFileAudioStorage(
+                outputDir = config.localOutputDir,
+                baseUrl = config.baseUrl,
+            )
+        }
     }
 }

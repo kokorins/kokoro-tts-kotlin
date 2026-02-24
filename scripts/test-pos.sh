@@ -6,32 +6,38 @@
 # context-dependent function words (the, to, a).
 #
 # Usage:
-#   ./scripts/test-pos.sh              # test against localhost:8080
+#   ./scripts/test-pos.sh              # test against localhost:8080 (requires AWS session)
+#   ./scripts/test-pos.sh --local      # test against localhost:8080 (no AWS needed)
 #   ./scripts/test-pos.sh --lambda     # auto-resolve Lambda Function URL
 #   BASE_URL=https://… ./scripts/test-pos.sh   # explicit URL
 #
 set -euo pipefail
 
 # ── Target resolution ─────────────────────────────────────────────
-# --lambda flag auto-resolves the Function URL from AWS.
-# BASE_URL env var takes precedence over the default localhost.
+# --local   skips AWS session check (for local storage mode)
+# --lambda  auto-resolves the Function URL from AWS
+# BASE_URL  env var takes precedence over the default localhost
 
 USE_LAMBDA=false
+USE_LOCAL=false
 for arg in "$@"; do
     case "$arg" in
         --lambda) USE_LAMBDA=true ;;
+        --local)  USE_LOCAL=true ;;
     esac
 done
 
-# ── AWS session check ───────────────────────────────────────────────
-if ! aws sts get-caller-identity &>/dev/null; then
-    echo "AWS session is not active. Attempting 'aws sso login'..."
-    aws sso login
+if [ "$USE_LOCAL" = false ]; then
+    # ── AWS session check ───────────────────────────────────────────
     if ! aws sts get-caller-identity &>/dev/null; then
-        echo "ERROR: AWS session is still not active after login. Exiting."
-        exit 1
+        echo "AWS session is not active. Attempting 'aws sso login'..."
+        aws sso login
+        if ! aws sts get-caller-identity &>/dev/null; then
+            echo "ERROR: AWS session is still not active after login. Exiting."
+            exit 1
+        fi
+        echo "AWS session is now active."
     fi
-    echo "AWS session is now active."
 fi
 
 if [ "$USE_LAMBDA" = true ]; then

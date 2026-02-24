@@ -35,6 +35,7 @@ import net.alexsobolev.tts.domain.StoredAudio
 import net.alexsobolev.tts.domain.VoiceId
 import net.alexsobolev.tts.domain.VoiceProfile
 import net.alexsobolev.tts.domain.VoiceSpec
+import net.alexsobolev.tts.infra.InfraConfig
 import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
 import kotlin.test.Test
@@ -89,11 +90,25 @@ class RoutingTest {
             override suspend fun store(audio: ByteArray, format: AudioFormat, voice: VoiceSpec) = fakeStoredAudio
         }
 
+    private val testInfraConfig =
+        InfraConfig(
+            tokenizerConfigPath = "",
+            voicesPath = "",
+            goldDictPath = "",
+            silverDictPath = "",
+            gbGoldDictPath = "",
+            gbSilverDictPath = "",
+            posModelPath = "",
+            onnxModelPath = "",
+            fixesDictPath = "",
+        )
+
     private fun testModule() = module {
         single<VoiceRepository> { fakeVoiceRepo }
         single<AudioStorage> { fakeStorage }
         single { TtsService(fakePhonemizer, fakeEngine, fakeEncoder, TurnGapGenerator(), SentencePostProcessor()) }
         single { SynthesizeSpeechUseCase(get(), get()) }
+        single { testInfraConfig }
     }
 
     private fun buildTestApp(block: suspend io.ktor.server.testing.ApplicationTestBuilder.() -> Unit) = testApplication {
@@ -122,6 +137,7 @@ class RoutingTest {
                     module {
                         single<VoiceRepository> { fakeVoiceRepo }
                         single { useCase }
+                        single { testInfraConfig }
                     },
                 )
             }

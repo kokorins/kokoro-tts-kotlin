@@ -1,0 +1,24 @@
+# Gradle
+.gradle/
+**/build/
+
+# IntelliJ IDEA
+.idea/
+
+# Large model files (downloaded via ./scripts/download-data.sh)
+data/*.onnx
+data/*.bin
+
+# Generated docs (OpenAPI / Swagger)
+docs/
+app/docs/
+
+# Local environment
+local.env
+
+# Local audio storage output
+output/
+
+# Generated audio files
+*.mp3
+*.wav

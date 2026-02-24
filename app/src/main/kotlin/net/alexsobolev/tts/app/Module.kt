@@ -29,6 +29,9 @@ fun Application.configureFrameworks() {
             s3Bucket = environment.config.property("tts.aws.s3Bucket").getString(),
             storagePrefix = environment.config.property("tts.storage.prefix").getString(),
             fixesDictPath = environment.config.property("tts.phonemizer.fixesDictPath").getString(),
+            storageMode = environment.config.property("tts.storage.mode").getString(),
+            localOutputDir = environment.config.property("tts.storage.localOutputDir").getString(),
+            baseUrl = environment.config.property("tts.storage.baseUrl").getString(),
         )
 
     install(Koin) {

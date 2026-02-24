@@ -21,7 +21,10 @@ tts:
   model:
     onnxPath: "data/kokoro-v1.0.int8.onnx"
   aws:
-    region: "$AWS_REGION:eu-central-1"
-    s3Bucket: "$S3_BUCKET:tts-audio-default"
+    region: "$AWS_REGION:"
+    s3Bucket: "$S3_BUCKET:"
   storage:
+    mode: "$STORAGE_MODE:local"
     prefix: "$STORAGE_PREFIX:tts-audio"
+    localOutputDir: "$LOCAL_OUTPUT_DIR:output"
+    baseUrl: "$BASE_URL:http://localhost:8080"

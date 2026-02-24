@@ -23,7 +23,7 @@ The entire process of building this project — from model research and G2P engi
   sdk install java 25-open
   ```
 - **curl** — required by the data download script (pre-installed on macOS/Linux)
-- **AWS credentials** — configured via environment variables or `~/.aws/credentials` (for S3 audio storage)
+- **AWS credentials** (optional) — only needed for S3 storage mode; local mode requires no AWS setup
 
 ### Clone and Setup
 
@@ -53,9 +53,12 @@ This downloads into the `data/` directory:
 
 ### Configure Environment
 
-Set the required S3 bucket for audio storage:
+By default the server uses **local storage** — audio files are written to an `output/` directory and served via HTTP. No AWS credentials needed.
+
+For S3 storage, set:
 
 ```bash
+export STORAGE_MODE=s3
 export AWS_REGION=eu-central-1
 export S3_BUCKET=my-tts-bucket
 ```
@@ -74,7 +77,7 @@ See [Configuration](#configuration) for all available settings.
 ./gradlew :app:run
 ```
 
-The server starts on port **8080**. Swagger UI at `/swagger`, OpenAPI spec at `/openapi`.
+The server starts on port **8080** with local file storage (no AWS required). Audio files are saved to `output/` and served at `http://localhost:8080/audio/...`. Swagger UI at `/swagger`, OpenAPI spec at `/openapi`.
 
 ## API
 
@@ -129,12 +132,12 @@ POST /v1/tts
 }
 ```
 
-**Response:**
+**Response (local mode):**
 
 ```json
 {
-  "url": "https://bucket.s3.region.amazonaws.com/tts-audio/af_heart/uuid.wav",
-  "key": "tts-audio/af_heart/uuid.wav",
+  "url": "http://localhost:8080/audio/af_heart/uuid.wav",
+  "key": "af_heart/uuid.wav",
   "expiresInSeconds": 0,
   "sizeBytes": 48044,
   "format": "wav",
@@ -201,15 +204,15 @@ app / lambda  -->  core  -->  domain
 
 - **domain** — Pure value types (`VoiceId`, `SpeechRate`, `AudioFormat`, `SynthesisException`), zero dependencies
 - **core** — Port interfaces (`PhonemeGenerator`, `InferenceEngine`, `AudioEncoder`, `VoiceRepository`, `AudioStorage`), DTOs, use cases, TTS service orchestration
-- **infra** — Adapters: ONNX inference, POS-aware G2P (OpenNLP + misaki dictionaries), WAV/MP3 encoding, S3 storage, MCP server factory
+- **infra** — Adapters: ONNX inference, POS-aware G2P (OpenNLP + misaki dictionaries), WAV/MP3 encoding, local/S3 storage, MCP server factory
 - **app** — Ktor HTTP layer with Koin DI composition
 - **lambda** — AWS Lambda handler with singleton cold-start initialization
 
 ### TTS Pipeline
 
 ```
-Text --> EnglishPhonemeGenerator --> KokoroTokenizer --> OnnxKokoroEngine --> SentencePostProcessor --> LocalAudioEncoder --> S3AudioStorage
-         (POS-aware G2P)            (IPA -> tokens)     (ONNX @ 24kHz)      (volume envelopes)        (WAV/MP3)            (upload + URL)
+Text --> EnglishPhonemeGenerator --> KokoroTokenizer --> OnnxKokoroEngine --> SentencePostProcessor --> LocalAudioEncoder --> AudioStorage
+         (POS-aware G2P)            (IPA -> tokens)     (ONNX @ 24kHz)      (volume envelopes)        (WAV/MP3)            (local disk or S3)
 ```
 
 ### G2P (Grapheme-to-Phoneme)
@@ -260,10 +263,12 @@ Blended voices (e.g., `af_heart:0.6+af_bella:0.4`) are created by weighted avera
 
 ```bash
 docker build -t kokoro-tts .
+docker run -p 8080:8080 kokoro-tts                          # local storage (default)
 docker run -p 8080:8080 \
+  -e STORAGE_MODE=s3 \
   -e AWS_REGION=eu-central-1 \
   -e S3_BUCKET=my-tts-bucket \
-  kokoro-tts
+  kokoro-tts                                                # S3 storage
 ```
 
 Non-root user, 3 GB heap, `ExitOnOutOfMemoryError`. Multi-stage build with Gradle dependency caching.
@@ -297,18 +302,24 @@ tts:
   model:
     onnxPath: "data/kokoro-v1.0.int8.onnx"
   aws:
-    region: "$AWS_REGION:eu-central-1"
-    s3Bucket: "$S3_BUCKET:tts-audio-default"
+    region: "$AWS_REGION:"
+    s3Bucket: "$S3_BUCKET:"
   storage:
+    mode: "$STORAGE_MODE:local"
     prefix: "$STORAGE_PREFIX:tts-audio"
+    localOutputDir: "$LOCAL_OUTPUT_DIR:output"
+    baseUrl: "$BASE_URL:http://localhost:8080"
 ```
 
 All settings support environment variable overrides using Ktor's `$ENV_VAR:default` syntax. The Lambda handler reads the same settings from environment variables directly.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `AWS_REGION` | `eu-central-1` | AWS region for S3 |
-| `S3_BUCKET` | — | S3 bucket for audio storage |
+| `STORAGE_MODE` | `local` | Storage backend: `local` (disk + HTTP) or `s3` |
+| `LOCAL_OUTPUT_DIR` | `output` | Directory for local audio files |
+| `BASE_URL` | `http://localhost:8080` | Public base URL for local audio download links |
+| `AWS_REGION` | — | AWS region (required for `s3` mode) |
+| `S3_BUCKET` | — | S3 bucket (required for `s3` mode) |
 | `STORAGE_PREFIX` | `tts-audio` | S3 object key prefix |
 
 ## Model Files
