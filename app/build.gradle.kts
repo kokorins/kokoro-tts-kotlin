@@ -7,6 +7,11 @@ application {
     mainClass = "io.ktor.server.netty.EngineMain"
 }
 
+// Resolve data/* paths (config, model, dictionaries) from project root
+tasks.named<org.gradle.api.tasks.JavaExec>("run").configure {
+    workingDir = rootProject.projectDir
+}
+
 ktor {
     openApi {
         enabled = true

@@ -73,6 +73,14 @@ See [Configuration](#configuration) for all available settings.
 
 ## Quick Start
 
+Download model and lexicon files (required once; see [Download Model Files](#download-model-files)):
+
+```bash
+./scripts/download-data.sh
+```
+
+Then run the server:
+
 ```bash
 ./gradlew :app:run
 ```
@@ -311,7 +319,7 @@ tts:
     baseUrl: "$BASE_URL:http://localhost:8080"
 ```
 
-All settings support environment variable overrides using Ktor's `$ENV_VAR:default` syntax. The Lambda handler reads the same settings from environment variables directly.
+All settings support environment variable overrides using Ktor's `$ENV_VAR:default` syntax. The Lambda handler reads the same settings from environment variables directly. When `tts.aws` is omitted (or `S3_BUCKET` is unset for Lambda), audio is stored locally under `STORAGE_PREFIX` with the same directory structure as S3.
 
 | Variable | Default | Description |
 |----------|---------|-------------|

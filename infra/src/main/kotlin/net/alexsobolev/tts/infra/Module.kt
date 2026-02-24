@@ -17,7 +17,11 @@ import net.alexsobolev.tts.infra.g2p.PosTagger
 import net.alexsobolev.tts.infra.inference.KokoroTokenizer
 import net.alexsobolev.tts.infra.inference.NpzVoiceRepository
 import net.alexsobolev.tts.infra.inference.OnnxKokoroEngine
+<<<<<<< HEAD
 import net.alexsobolev.tts.infra.storage.LocalFileAudioStorage
+=======
+import net.alexsobolev.tts.infra.storage.LocalAudioStorage
+>>>>>>> 782d46b (Adding local storage, make gradle find proper jdk version)
 import net.alexsobolev.tts.infra.storage.S3AudioStorage
 import org.koin.dsl.module
 
@@ -67,30 +71,49 @@ fun infraModule(config: InfraConfig) = module {
 
     single<AudioEncoder> { LocalAudioEncoder() }
 
+<<<<<<< HEAD
     if (config.storageMode == "s3") {
         single {
             S3Client {
                 region = config.awsRegion
+=======
+    if (config.aws != null) {
+        single {
+            S3Client {
+                region = config.aws.region
+>>>>>>> 782d46b (Adding local storage, make gradle find proper jdk version)
                 retryStrategy {
                     maxAttempts = 3
                 }
             }
         }
+<<<<<<< HEAD
 
         single<AudioStorage> {
             S3AudioStorage(
                 s3 = get(),
                 bucketName = config.s3Bucket,
                 region = config.awsRegion,
+=======
+        single<AudioStorage> {
+            S3AudioStorage(
+                s3 = get(),
+                bucketName = config.aws.bucket,
+                region = config.aws.region,
+>>>>>>> 782d46b (Adding local storage, make gradle find proper jdk version)
                 storagePrefix = config.storagePrefix,
             )
         }
     } else {
         single<AudioStorage> {
+<<<<<<< HEAD
             LocalFileAudioStorage(
                 outputDir = config.localOutputDir,
                 baseUrl = config.baseUrl,
             )
+=======
+            LocalAudioStorage(storagePrefix = config.storagePrefix)
+>>>>>>> 782d46b (Adding local storage, make gradle find proper jdk version)
         }
     }
 }

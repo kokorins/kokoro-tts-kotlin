@@ -57,7 +57,7 @@ Route DI: `configureRouting()` resolves Koin dependencies at the `Application` s
 
 **`domain/Constants`** holds only model-intrinsic values (sample rate, token limits, embedding dimensions) and validation bounds (speed range, max text length).
 
-**`InfraConfig`** holds deployment-specific settings (`s3Bucket`, `awsRegion`, `storagePrefix`). The app reads these from `application.yaml`; the lambda reads from environment variables.
+**`InfraConfig`** holds deployment-specific settings (optional `aws`, required `storagePrefix`). When `aws` is null, local storage is used under `storagePrefix`; otherwise S3 is used. The app reads from `application.yaml`; the lambda reads from environment variables.
 
 **File-level constants** — use `private const val` / `private val` at file level, never inside a `companion object`:
 
