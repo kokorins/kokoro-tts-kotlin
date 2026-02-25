@@ -1,8 +1,7 @@
 package net.alexsobolev.tts.infra
 
 /**
- * File paths and storage settings needed to wire up the infrastructure module adapters.
- * When [storageMode] is "s3", [awsRegion] and [s3Bucket] are used; otherwise [localOutputDir] and [baseUrl] are used.
+ * File paths and AWS settings needed to wire up the infrastructure module adapters.
  */
 data class InfraConfig(
     val tokenizerConfigPath: String,

@@ -319,7 +319,7 @@ tts:
     baseUrl: "$BASE_URL:http://localhost:8080"
 ```
 
-All settings support environment variable overrides using Ktor's `$ENV_VAR:default` syntax. The Lambda handler reads the same settings from environment variables directly. When `tts.aws` is omitted (or `S3_BUCKET` is unset for Lambda), audio is stored locally under `STORAGE_PREFIX` with the same directory structure as S3.
+All settings support environment variable overrides using Ktor's `$ENV_VAR:default` syntax. The Lambda handler reads the same settings from environment variables directly.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
