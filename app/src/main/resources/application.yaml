@@ -20,7 +20,6 @@ tts:
     modelPath: "data/en-pos-perceptron.bin"
   model:
     onnxPath: "data/kokoro-v1.0.int8.onnx"
-<<<<<<< HEAD
   aws:
     region: "$AWS_REGION:"
     s3Bucket: "$S3_BUCKET:"
@@ -29,12 +28,3 @@ tts:
     prefix: "$STORAGE_PREFIX:tts-audio"
     localOutputDir: "$LOCAL_OUTPUT_DIR:output"
     baseUrl: "$BASE_URL:http://localhost:8080"
-=======
-  # Optional: when omitted, audio is stored locally under storage.prefix (same layout as S3).
-  # Uncomment to use S3:
-  # aws:
-  #   region: "$AWS_REGION:eu-central-1"
-  #   s3Bucket: "$S3_BUCKET:tts-audio-default"
-  storage:
-    prefix: "$STORAGE_PREFIX"
->>>>>>> 782d46b (Adding local storage, make gradle find proper jdk version)

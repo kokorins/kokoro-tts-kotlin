@@ -8,7 +8,6 @@ import io.ktor.server.plugins.compression.Compression
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.sse.SSE
 import net.alexsobolev.tts.core.coreModule
-import net.alexsobolev.tts.infra.AwsConfig
 import net.alexsobolev.tts.infra.InfraConfig
 import net.alexsobolev.tts.infra.infraModule
 import org.koin.ktor.plugin.Koin
@@ -16,19 +15,6 @@ import org.koin.logger.slf4jLogger
 import org.slf4j.event.Level
 
 fun Application.configureFrameworks() {
-    val aws = run {
-        val region = try {
-            environment.config.property("tts.aws.region").getString().takeIf { it.isNotBlank() }
-        } catch (_: Exception) {
-            null
-        }
-        val bucket = try {
-            environment.config.property("tts.aws.s3Bucket").getString().takeIf { it.isNotBlank() }
-        } catch (_: Exception) {
-            null
-        }
-        if (region != null && bucket != null) AwsConfig(region = region, bucket = bucket) else null
-    }
     val config =
         InfraConfig(
             tokenizerConfigPath = environment.config.property("tts.tokenizer.configPath").getString(),
@@ -39,7 +25,8 @@ fun Application.configureFrameworks() {
             gbSilverDictPath = environment.config.property("tts.phonemizer.gbSilverDictPath").getString(),
             posModelPath = environment.config.property("tts.pos.modelPath").getString(),
             onnxModelPath = environment.config.property("tts.model.onnxPath").getString(),
-            aws = aws,
+            awsRegion = try { environment.config.property("tts.aws.region").getString() } catch (_: Exception) { "" },
+            s3Bucket = try { environment.config.property("tts.aws.s3Bucket").getString() } catch (_: Exception) { "" },
             storagePrefix = environment.config.property("tts.storage.prefix").getString(),
             fixesDictPath = environment.config.property("tts.phonemizer.fixesDictPath").getString(),
             storageMode = environment.config.property("tts.storage.mode").getString(),

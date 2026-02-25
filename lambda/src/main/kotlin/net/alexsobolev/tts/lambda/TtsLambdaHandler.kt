@@ -18,7 +18,6 @@ import net.alexsobolev.tts.core.dto.Voice
 import net.alexsobolev.tts.core.dto.VoicesResponse
 import net.alexsobolev.tts.core.usecase.SynthesizeSpeechUseCase
 import net.alexsobolev.tts.domain.SynthesisException
-import net.alexsobolev.tts.infra.AwsConfig
 import net.alexsobolev.tts.infra.InfraConfig
 import net.alexsobolev.tts.infra.infraModule
 import net.alexsobolev.tts.infra.mcp.McpServerFactory
@@ -64,13 +63,7 @@ class TtsLambdaHandler :
         if (GlobalContext.getOrNull() != null) return
 
         val s3Bucket = env("S3_BUCKET", "").takeIf { it.isNotBlank() }
-        val aws =
-            s3Bucket?.let { bucket ->
-                AwsConfig(
-                    region = env("AWS_REGION", "eu-central-1"),
-                    bucket = bucket,
-                )
-            }
+        val storageMode = if (s3Bucket != null) "s3" else "local"
         val config =
             InfraConfig(
                 tokenizerConfigPath = env("TTS_TOKENIZER_CONFIG_PATH", "data/config.json"),
@@ -81,9 +74,13 @@ class TtsLambdaHandler :
                 gbSilverDictPath = env("TTS_GB_SILVER_DICT_PATH", "data/gb_silver.json"),
                 posModelPath = env("TTS_POS_MODEL_PATH", "data/en-pos-perceptron.bin"),
                 onnxModelPath = env("TTS_ONNX_MODEL_PATH", "data/kokoro-v1.0.int8.onnx"),
-                aws = aws,
+                awsRegion = env("AWS_REGION", "eu-central-1"),
+                s3Bucket = s3Bucket ?: "",
                 storagePrefix = env("STORAGE_PREFIX", "tts-audio"),
                 fixesDictPath = env("TTS_FIXES_DICT_PATH", "data/lexicon_fixes.json"),
+                storageMode = storageMode,
+                localOutputDir = env("LOCAL_OUTPUT_DIR", "output"),
+                baseUrl = env("BASE_URL", "http://localhost:8080"),
             )
 
         startKoin {

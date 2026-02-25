@@ -1,16 +1,8 @@
 package net.alexsobolev.tts.infra
 
 /**
- * AWS-specific settings. When present, S3 storage is used; when null, local storage is used.
- */
-data class AwsConfig(
-    val region: String,
-    val bucket: String,
-)
-
-/**
- * File paths and optional AWS settings needed to wire up the infrastructure module adapters.
- * When [aws] is null, [storagePrefix] is used as the base directory for local file storage.
+ * File paths and storage settings needed to wire up the infrastructure module adapters.
+ * When [storageMode] is "s3", [awsRegion] and [s3Bucket] are used; otherwise [localOutputDir] and [baseUrl] are used.
  */
 data class InfraConfig(
     val tokenizerConfigPath: String,
@@ -21,14 +13,9 @@ data class InfraConfig(
     val gbSilverDictPath: String,
     val posModelPath: String,
     val onnxModelPath: String,
-<<<<<<< HEAD
     val awsRegion: String = "",
     val s3Bucket: String = "",
     val storagePrefix: String = "tts-audio",
-=======
-    val aws: AwsConfig?,
-    val storagePrefix: String,
->>>>>>> 782d46b (Adding local storage, make gradle find proper jdk version)
     val fixesDictPath: String,
     val storageMode: String = "local",
     val localOutputDir: String = "output",
